@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ThreadUnionImpl implements ThreadUnion {
-    private final String FORMAT = "%s-worker-%d";
+    private final static String FORMAT = "%s-worker-%d";
     private final List<Thread> threads = Collections.synchronizedList(new ArrayList<>());
     private final List<FinishedThreadResult> result = Collections.synchronizedList(new ArrayList<>());
     private final AtomicInteger counter = new AtomicInteger(0);
