@@ -11,7 +11,6 @@ public class ThreadUnionImpl implements ThreadUnion {
     private final List<Thread> threads = Collections.synchronizedList(new ArrayList<>());
     private final List<FinishedThreadResult> result = Collections.synchronizedList(new ArrayList<>());
     private final AtomicInteger counter = new AtomicInteger(0);
-    private final Object lock = new Object();
     private final String name;
     private boolean isShutdown = false;
 
@@ -43,23 +42,16 @@ public class ThreadUnionImpl implements ThreadUnion {
     }
 
     @Override
-    public void awaitTermination() {
-        synchronized (lock) {
-            threads.forEach(
-                    thread -> {
-                        try {
-                            thread.join();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } finally {
-                            thread.interrupt();
-                        }
-                    }
+    public synchronized void awaitTermination() {
+        threads.forEach(thread -> {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
             );
         }
-
-
-    }
 
     @Override
     public boolean isFinished() {
@@ -79,8 +71,8 @@ public class ThreadUnionImpl implements ThreadUnion {
         }
 
         Thread thread = createThread(r);
-        thread.setUncaughtExceptionHandler((t, e) ->
-                result.add(new FinishedThreadResult(t.getName(), e)));
+        thread.setUncaughtExceptionHandler((threadName, e) ->
+                result.add(new FinishedThreadResult(threadName.getName(), e)));
 
         threads.add(thread);
         return thread;
@@ -88,11 +80,12 @@ public class ThreadUnionImpl implements ThreadUnion {
     }
 
     private Thread createThread(Runnable runnable)  {
-        return new Thread(runnable, String.format(FORMAT, name, counter.getAndIncrement())) {
+        String threadName = String.format(FORMAT, name, counter.getAndIncrement());
+        return new Thread(runnable, threadName) {
             @Override
             public void run() {
                 super.run();
-                result.add(new FinishedThreadResult(this.getName()));
+                result.add(new FinishedThreadResult(threadName));
             }
         };
 
