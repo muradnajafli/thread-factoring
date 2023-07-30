@@ -42,7 +42,7 @@ public class ThreadUnionImpl implements ThreadUnion {
     }
 
     @Override
-    public synchronized void awaitTermination() {
+    public void awaitTermination() {
         threads.forEach(thread -> {
             try {
                 thread.join();
