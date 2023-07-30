@@ -47,7 +47,7 @@ public class ThreadUnionImpl implements ThreadUnion {
             try {
                 thread.join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.out.println("InterruptedException handled!");
             }
         }
             );
